@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404
 
 from .models import Comment, Group, Post
 from .serializers import (
-    CommentSerializer, FollowSerializer, GroupSerializer, PostSerializer)
+    CommentSerializer, FollowSerializer, GroupSerializer, PostSerializer
+)
 
 ACCSESS_ERROR_MESSAGE = 'You have no rights to edit this post'
 
