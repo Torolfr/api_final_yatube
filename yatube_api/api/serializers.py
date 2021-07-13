@@ -20,7 +20,10 @@ class PostSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True,
     )
-    group = serializers.PrimaryKeyRelatedField(read_only=True)
+    group = serializers.PrimaryKeyRelatedField(
+        queryset=Group.objects.all(),
+        required=False
+    )
 
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date', 'group')

@@ -4,14 +4,18 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
 from .models import Group, Post
-from .permissions import IsOwnerOrReadOnlyPermission
+from .permissions import IsAuthorOrReadOnlyPermission
 from .serializers import (
     CommentSerializer, FollowSerializer, GroupSerializer, PostSerializer
 )
 
 
-class GroupViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
-                   viewsets.GenericViewSet):
+class CreateListViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                        viewsets.GenericViewSet):
+    pass
+
+
+class GroupViewSet(CreateListViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
@@ -19,7 +23,10 @@ class GroupViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = (IsOwnerOrReadOnlyPermission,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthorOrReadOnlyPermission
+    )
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('group',)
 
@@ -29,7 +36,10 @@ class PostViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsOwnerOrReadOnlyPermission,)
+    permission_classes = (
+        permissions.IsAuthenticated,
+        IsAuthorOrReadOnlyPermission
+    )
 
     def get_queryset(self):
         post_id = self.kwargs.get('post_id')
@@ -43,7 +53,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, post=post)
 
 
-class FollowViewSet(viewsets.ModelViewSet):
+class FollowViewSet(CreateListViewSet):
     serializer_class = FollowSerializer
     permission_classes = (permissions.IsAuthenticated,)
     filter_backends = (filters.SearchFilter,)
